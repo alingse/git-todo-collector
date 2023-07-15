@@ -36,13 +36,20 @@ fn main() {
             }
             // TODO
             let content = std::str::from_utf8(blob.content()).unwrap();
-            let filepath = path.to_owned() + entry.name().unwrap();
-            let blame = repo.blame_file(Path::new(&filepath), None).unwrap();
+            let mut lines: Vec<(usize, &str)> = Vec::new();
             for (lineno, line) in content.lines().into_iter().enumerate() {
                 if line.contains("TODO") {
-                    let blame_line = blame.get_line(lineno).unwrap();
-                    println!("line {} got {}", line, blame_line.final_commit_id());
+                    lines.push((lineno, line));
                 }
+            }
+            if lines.len() == 0 {
+                return TreeWalkResult::Ok;
+            }
+            let filepath = path.to_owned() + entry.name().unwrap();
+            let blame = repo.blame_file(Path::new(&filepath), None).unwrap();
+            for (lineno, line) in lines.iter() {
+                let blame_line = blame.get_line(*lineno).unwrap();
+                println!("line {} got {}", line, blame_line.final_commit_id());
             }
         }
         TreeWalkResult::Ok
