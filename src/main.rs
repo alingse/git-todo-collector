@@ -6,7 +6,7 @@ use serde_json::to_string;
 use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
-#[command(author = "alingse", version, about, long_about = None)]
+#[command(author = "alingse", version="0.1.0", about, long_about = None)]
 struct Cli {
     #[arg(short, long, value_name = "PATH")]
     repo: Option<PathBuf>,
