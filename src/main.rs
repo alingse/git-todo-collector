@@ -6,7 +6,7 @@ use serde_json::to_string;
 use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None)]
+#[command(author = "alingse", version, about, long_about = None)]
 struct Cli {
     #[arg(short, long, value_name = "PATH")]
     repo: Option<PathBuf>,
@@ -69,7 +69,7 @@ fn main() {
                 let todo = TODO {
                     path: path.clone(),
                     lineno: *lineno,
-                    line: line.to_string(),
+                    line: line.trim().to_string(),
                     commit_id: commit_id.to_string(),
                     author: commit.author().to_string(),
                     datetime: format!("{}", git_time_to_datetime(commit.time())),
