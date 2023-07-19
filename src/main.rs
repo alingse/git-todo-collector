@@ -6,7 +6,9 @@ use serde_json::to_string;
 use std::path::{Path, PathBuf};
 use tabled::{Table, Tabled};
 
-static TODOPrefix: &str = "TODO:";
+static /*🤔*/ TODO_PREFIX: &str = "TODO:";
+static COMMIT_HEAD_SIZE: usize = 7;
+static LINE_LENGTH: usize = 15;
 #[derive(Parser)]
 #[command(author = "alingse", version="0.1.0", about, long_about = None)]
 struct Cli {
@@ -53,7 +55,7 @@ fn main() {
             let content = std::str::from_utf8(blob.content()).unwrap();
             let mut lines: Vec<(usize, &str)> = Vec::new();
             for (lineno, line) in content.lines().into_iter().enumerate() {
-                if line.contains(TODOPrefix) {
+                if line.contains(TODO_PREFIX) {
                     lines.push((lineno + 1, line));
                 }
             }
@@ -71,8 +73,8 @@ fn main() {
                 let todo = TODO {
                     path: path.clone(),
                     lineno: *lineno,
-                    line: line.trim().to_string(),
-                    commit_id: commit_id.to_string(),
+                    line: line.trim()[..LINE_LENGTH].to_string(),
+                    commit_id: commit_id.to_string().as_str()[0..COMMIT_HEAD_SIZE].to_string(),
                     author: commit.author().to_string(),
                     datetime: format!("{}", gittime_to_datetime(commit.time())),
                 };
