@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use table_to_html::HtmlTable;
 use tabled::{Table, Tabled};
 
-static TODO_PREFIX: &str = "TODO:"; // TODO: use a smart way
+const TODO_PREFIX: &str = "ToDo:"; // TODO: use a smart way
 static COMMIT_HEAD_SIZE: usize = 7;
 static LINE_LENGTH: usize = 12;
 
@@ -66,6 +66,10 @@ fn main() {
     let tree = repo.find_tree(commit.tree_id()).unwrap();
 
     let mut todos: Vec<TODO> = Vec::new();
+    let todo_upper = TODO_PREFIX.to_uppercase();
+    let todo_lower = TODO_PREFIX.to_uppercase();
+    let todo_upper_str = todo_upper.as_str();
+    let todo_lower_str = todo_lower.as_str();
     tree.walk(TreeWalkMode::PreOrder, |dir: &str, entry| {
         if entry.kind() == Some(git2::ObjectType::Blob) {
             let obj = entry.to_object(&repo).unwrap();
@@ -77,7 +81,7 @@ fn main() {
             let content = std::str::from_utf8(blob.content()).unwrap();
             let mut lines: Vec<(usize, &str)> = Vec::new();
             for (lineno, line) in content.lines().into_iter().enumerate() {
-                if line.contains(TODO_PREFIX) {
+                if line.contains(todo_upper_str) || line.contains(todo_lower_str) {
                     lines.push((lineno + 1, line));
                 }
             }
