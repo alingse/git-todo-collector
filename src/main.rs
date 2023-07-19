@@ -4,6 +4,7 @@ use git2::{Repository, TreeWalkMode, TreeWalkResult};
 use serde_derive::{Deserialize, Serialize};
 use serde_json::to_string;
 use std::path::{Path, PathBuf};
+use tabled::{Table, Tabled};
 
 #[derive(Parser)]
 #[command(author = "alingse", version="0.1.0", about, long_about = None)]
@@ -12,7 +13,7 @@ struct Cli {
     repo: Option<PathBuf>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Tabled)]
 struct TODO {
     path: String,
     lineno: usize,
@@ -72,7 +73,7 @@ fn main() {
                     line: line.trim().to_string(),
                     commit_id: commit_id.to_string(),
                     author: commit.author().to_string(),
-                    datetime: format!("{}", git_time_to_datetime(commit.time())),
+                    datetime: format!("{}", gittime_to_datetime(commit.time())),
                 };
                 todos.push(todo);
             }
@@ -81,13 +82,17 @@ fn main() {
     })
     .unwrap();
 
+    let table = Table::new(todos).to_string();
+    println!("{}", table);
+    /*
     for todo in todos {
         let json = to_string(&todo).unwrap();
         println!("{}", json);
     }
+     */
 }
 
-fn git_time_to_datetime(t: git2::Time) -> DateTime<FixedOffset> {
+fn gittime_to_datetime(t: git2::Time) -> DateTime<FixedOffset> {
     let secs: i64 = t.seconds();
     let sign: char = t.sign();
     let offset: i32 = t.offset_minutes() * 60;
