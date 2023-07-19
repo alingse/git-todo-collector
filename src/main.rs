@@ -6,6 +6,7 @@ use serde_json::to_string;
 use std::path::{Path, PathBuf};
 use tabled::{Table, Tabled};
 
+static TODOPrefix: &str = "TODO:";
 #[derive(Parser)]
 #[command(author = "alingse", version="0.1.0", about, long_about = None)]
 struct Cli {
@@ -52,7 +53,7 @@ fn main() {
             let content = std::str::from_utf8(blob.content()).unwrap();
             let mut lines: Vec<(usize, &str)> = Vec::new();
             for (lineno, line) in content.lines().into_iter().enumerate() {
-                if line.contains("TODO:") {
+                if line.contains(TODOPrefix) {
                     lines.push((lineno + 1, line));
                 }
             }
