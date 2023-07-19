@@ -4,7 +4,7 @@ use git2::{Repository, TreeWalkMode, TreeWalkResult};
 use serde_derive::{Deserialize, Serialize};
 use serde_json::to_string;
 use std::path::{Path, PathBuf};
-use table_to_html::{Alignment, Entity, HtmlTable};
+use table_to_html::HtmlTable;
 use tabled::{Table, Tabled};
 
 static /*🤔*/ TODO_PREFIX: &str = "TODO:";
@@ -134,7 +134,6 @@ fn main() {
         FORMAT_HTML => {
             let mut html_table = HtmlTable::from(Table::builder(&todos));
             html_table.set_border(1);
-            html_table.set_alignment(Entity::Row(1), Alignment::center());
             println!("{}", html_table.to_string());
         }
         _ => {}
