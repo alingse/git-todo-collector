@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use table_to_html::HtmlTable;
 use tabled::{Table, Tabled};
 
-static /*🤔*/ TODO_PREFIX: &str = "TODO:";
+static TODO_PREFIX: &str = "TODO:"; // TODO: use a smart way
 static COMMIT_HEAD_SIZE: usize = 7;
 static LINE_LENGTH: usize = 12;
 
