@@ -4,30 +4,52 @@ use git2::{Repository, TreeWalkMode, TreeWalkResult};
 use serde_derive::{Deserialize, Serialize};
 use serde_json::to_string;
 use std::path::{Path, PathBuf};
+use table_to_html::{Alignment, Entity, HtmlTable};
 use tabled::{Table, Tabled};
 
 static /*🤔*/ TODO_PREFIX: &str = "TODO:";
 static COMMIT_HEAD_SIZE: usize = 7;
-static LINE_LENGTH: usize = 15;
+static LINE_LENGTH: usize = 12;
+
+const FORMAT_TABLE: &str = "table";
+const FORMAT_JSON: &str = "json";
+const FORMAT_CSV: &str = "csv";
+const FORMAT_HTML: &str = "html";
+
+const WITH_LINE_IGNORE: &str = "ignore";
+const WITH_LINE_EXCERPT: &str = "excerpt";
+const WITH_LINE_FULL: &str = "full";
+
 #[derive(Parser)]
 #[command(author = "alingse", version="0.1.0", about, long_about = None)]
 struct Cli {
-    #[arg(short, long, value_name = "PATH")]
+    /// the git repo
+    #[arg(short, long)]
     repo: Option<PathBuf>,
+
+    /// output format
+    #[arg(short, long, value_parser([FORMAT_TABLE, FORMAT_JSON, FORMAT_CSV, FORMAT_HTML]), default_value=FORMAT_TABLE)]
+    format: Option<String>,
+
+    /// with the line content
+    #[arg(long, value_parser([WITH_LINE_IGNORE, WITH_LINE_EXCERPT, WITH_LINE_FULL]), default_value=WITH_LINE_IGNORE)]
+    with_line: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Tabled)]
 struct TODO {
     path: String,
     lineno: usize,
-    commit_id: String,
+    commit: String,
     author: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
     line: String,
     datetime: String,
 }
 
 fn main() {
-    let cli = Cli::parse();
+    let cli: Cli = Cli::parse();
+    let with_line: String = cli.with_line.unwrap();
     let mut path: PathBuf = PathBuf::from(".");
     if let Some(p) = cli.repo {
         path = p;
@@ -70,14 +92,24 @@ fn main() {
                 let commit_id = blame_line.final_commit_id();
                 let commit = repo.find_commit(commit_id).unwrap();
                 // build TODO
-                let todo = TODO {
+                let mut todo = TODO {
                     path: path.clone(),
                     lineno: *lineno,
-                    line: line.trim()[..LINE_LENGTH].to_string(),
-                    commit_id: commit_id.to_string().as_str()[0..COMMIT_HEAD_SIZE].to_string(),
+                    line: "".to_string(),
+                    commit: commit_id.to_string().as_str()[0..COMMIT_HEAD_SIZE].to_string(),
                     author: commit.author().to_string(),
                     datetime: format!("{}", gittime_to_datetime(commit.time())),
                 };
+                //
+                match with_line.as_str() {
+                    WITH_LINE_EXCERPT => {
+                        todo.line = excerpt_line(line.trim(), LINE_LENGTH).to_string();
+                    }
+                    WITH_LINE_FULL => {
+                        todo.line = line.trim().to_string();
+                    }
+                    _ => {}
+                }
                 todos.push(todo);
             }
         }
@@ -85,14 +117,28 @@ fn main() {
     })
     .unwrap();
 
-    let table = Table::new(todos).to_string();
-    println!("{}", table);
-    /*
-    for todo in todos {
-        let json = to_string(&todo).unwrap();
-        println!("{}", json);
+    // do format
+    let format = cli.format.unwrap();
+    match format.as_str() {
+        FORMAT_JSON => {
+            for todo in todos {
+                let json = to_string(&todo).unwrap();
+                println!("{}", json);
+            }
+        }
+        FORMAT_CSV => {}
+        FORMAT_TABLE => {
+            let table = Table::new(todos);
+            println!("{}", table.to_string());
+        }
+        FORMAT_HTML => {
+            let mut html_table = HtmlTable::from(Table::builder(&todos));
+            html_table.set_border(1);
+            html_table.set_alignment(Entity::Row(1), Alignment::center());
+            println!("{}", html_table.to_string());
+        }
+        _ => {}
     }
-     */
 }
 
 fn gittime_to_datetime(t: git2::Time) -> DateTime<FixedOffset> {
@@ -110,4 +156,9 @@ fn gittime_to_datetime(t: git2::Time) -> DateTime<FixedOffset> {
     let naive = NaiveDateTime::from_timestamp_opt(secs, 0).unwrap();
     let dt: DateTime<FixedOffset> = DateTime::<FixedOffset>::from_utc(naive, timezone);
     return dt;
+}
+
+fn excerpt_line(line: &str, length: usize) -> &str {
+    let position = line.char_indices().nth(length).unwrap().0;
+    return &line[..position];
 }
