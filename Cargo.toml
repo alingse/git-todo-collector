@@ -6,6 +6,7 @@ authors = ["alingse <alingse@foxmail.com>"]
 description = "collect TODO: items from git code repo"
 keywords = ["todo", "git-todo", "todo-in-code"]
 categories = ["command-line-utilities"]
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
