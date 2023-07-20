@@ -4,26 +4,28 @@ collect todo or others from a git  code repo
 ## Install
 
 ```bash
-git clone https://github.com/alingse/git-todo-collector
-cd git-todo-collector
-cargo build
+cargo install git-todo-collector
 ```
 
 ## Run
 
 ```bash
-# table
-./target/debug/git-todo-collector
-# table with other rpeo
-./target/debug/git-todo-collector -r ../../xx
+# find in current, output as table
+git-todo-collector
+# output table with other rpeo
+git-todo-collector -r ./some-git-repo-path
 # json
-./target/debug/git-todo-collector --format json
+git-todo-collector -r ./some-git-repo-path --format json
+# html
+git-todo-collector -r ./some-git-repo-path --format html > git-todos.html
 ```
 
-work with jq
+### work with jq
 ```bash
-./target/debug/git-todo-collector --format json | jq ''
+git-todo-collector --format json | jq ''
 ```
+
+the output
 
 ```json
 {
