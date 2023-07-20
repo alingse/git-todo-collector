@@ -4,9 +4,14 @@ version = "0.1.0"
 edition = "2021"
 authors = ["alingse <alingse@foxmail.com>"]
 description = "collect TODO: items from git code repo"
-keywords = ["todo", "git-todo", "todo-in-code"]
+keywords = ["todo", "git-todo", "todo-in-code", "find-todo-in-git-repo"]
 categories = ["command-line-utilities"]
 license = "MIT"
+
+[[bin]]
+bench = false
+path = "src/main.rs"
+name = "git-todo-collector"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
